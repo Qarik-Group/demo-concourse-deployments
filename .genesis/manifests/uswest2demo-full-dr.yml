@@ -1,0 +1,1122 @@
+azs:
+- cloud_properties:
+    availability_zone: us-west-2a
+  name: z1
+- cloud_properties:
+    availability_zone: us-west-2b
+  name: z2
+- cloud_properties:
+    availability_zone: us-west-2c
+  name: z3
+compilation:
+  az: z1
+  network: default
+  reuse_compilation_vms: true
+  vm_type: large
+  workers: 5
+disk_types:
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 2048
+  name: default
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 2048
+  name: consul
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 10240
+  name: concourse
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 4096
+  name: postgres
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 4096
+  name: blobstore
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 1024
+  name: vault
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 65536
+  name: bosh
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 131072
+  name: bosh-large
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 2048
+  name: shield
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 51200
+  name: prometheus
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 4096
+  name: rabbitmq
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 5120
+  name: 5GB
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 10240
+  name: 10GB
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 100240
+  name: 100GB
+- cloud_properties:
+    encrypted: true
+    type: gp3
+  disk_size: 10240
+  name: minio
+exodus:
+  atc_ca_cert: REDACTED
+  bosh: uswest2demo
+  dated: 2022-08-02 18:10:56 +0000
+  deployer: ubuntu
+  external_url: https://concoursedr.codex.starkandwayne.com
+  features: full,github-oauth,self-signed-cert,external-db,vault
+  is_director: false
+  kit_is_dev: false
+  kit_name: concourse
+  kit_version: 4.1.4
+  main_target: uswest2demo-full-dr
+  mode: full
+  password: REDACTED
+  self-signed: true
+  tsa_host: 10.4.1.171
+  tsa_host_public_key: REDACTED
+  tsa_port: 2222
+  tsa_worker_private_key: REDACTED
+  tsa_worker_public_key: REDACTED
+  use_create_env: false
+  username: concourse
+  vault_base: /secret/uswest2demo/full/concourse
+  version: 2.8.5
+genesis:
+  bosh-env: uswest2demo
+  bosh_env: uswest2demo
+  ci_mount: /secret/ci/
+  env: uswest2demo-full-dr
+  exodus_mount: /secret/exodus/
+  exodus_path: uswest2demo-full-dr/concourse
+  min_version: 2.7.6
+  secrets_mount: /secret/
+  secrets_path: uswest2demo/full/concourse
+instance_groups:
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 3
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: detect
+      http_proxy_url: ""
+      https_proxy_url: ""
+      no_proxy:
+      - localhost
+      - 127.0.0.1
+      runtime: containerd
+      worker_gateway:
+        worker_key:
+          private_key: REDACTED
+          public_key: REDACTED
+    release: concourse
+  name: worker
+  networks:
+  - name: concourse-full-dr
+  stemcell: default
+  update:
+    max_in_flight: 3
+    serial: true
+  vm_type: concourse-worker
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: haproxy
+    properties:
+      ha_proxy:
+        tcp:
+        - backend_port: 80
+          backend_servers:
+          - 10.4.1.171
+          name: web_http
+          port: 80
+        - backend_port: 443
+          backend_servers:
+          - 10.4.1.171
+          name: web_https
+          port: 443
+    release: haproxy
+  - name: bpm
+    release: bpm
+  name: haproxy
+  networks:
+  - name: concourse-full-dr
+    static_ips:
+    - 10.4.1.170
+  stemcell: default
+  vm_type: concourse
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: web
+    properties:
+      add_local_users:
+      - concourse:REDACTED
+      bind_port: 80
+      external_url: https://concoursedr.codex.starkandwayne.com
+      github_auth:
+        client_id: REDACTED
+        client_secret: REDACTED
+      main_team:
+        auth:
+          github:
+            orgs:
+            - starkandwayne
+          local:
+            users:
+            - concourse
+      postgresql:
+        database: atcdr
+        host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
+        port: 5432
+        role:
+          name: cfdbadmin
+          password: REDACTED
+        sslmode: verify-ca
+      publicly_viewable: true
+      tls:
+        bind_port: 443
+        cert:
+          certificate: REDACTED
+          private_key: REDACTED
+      token_signing_key:
+        private_key: REDACTED
+        public_key: REDACTED
+      vault:
+        auth:
+          backend_max_ttl: null
+          client_token: REDACTED
+        path_prefix: /concourse
+        tls:
+          insecure_skip_verify: true
+        url: https://10.4.1.7
+      worker_gateway:
+        authorized_keys:
+        - REDACTED
+        host_key:
+          private_key: REDACTED
+          public_key: REDACTED
+    release: concourse
+  - name: bpm
+    release: bpm
+  - name: locker
+    properties:
+      locker:
+        password: REDACTED
+        ssl_cert: REDACTED
+        ssl_key: REDACTED
+        user: locker
+    release: locker
+  name: web
+  networks:
+  - name: concourse-full-dr
+    static_ips:
+    - 10.4.1.171
+  stemcell: default
+  vm_type: concourse
+kit:
+  features:
+  - full
+  - github-oauth
+  - self-signed-cert
+  - external-db
+  - vault
+  name: concourse
+  version: latest
+meta:
+  default:
+    azs:
+    - z1
+    - z2
+    - z3
+    main_user: concourse
+    no_proxy:
+    - localhost
+    - 127.0.0.1
+  http_auth_password: REDACTED
+  jobs:
+    bpm:
+      release: bpm
+    haproxy:
+      properties:
+        ha_proxy:
+          tcp:
+          - backend_port: 80
+            backend_servers:
+            - 10.4.1.171
+            name: web_http
+            port: 80
+          - backend_port: 443
+            backend_servers:
+            - 10.4.1.171
+            name: web_https
+            port: 443
+      release: haproxy
+    locker:
+      properties:
+        locker:
+          password: REDACTED
+          ssl_cert: REDACTED
+          ssl_key: REDACTED
+          user: locker
+      release: locker
+    web:
+      properties:
+        add_local_users:
+        - concourse:REDACTED
+        bind_port: 80
+        external_url: https://concoursedr.codex.starkandwayne.com
+        github_auth:
+          client_id: REDACTED
+          client_secret: REDACTED
+        main_team:
+          auth:
+            github:
+              orgs:
+              - starkandwayne
+            local:
+              users:
+              - concourse
+        postgresql:
+          database: atcdr
+          host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
+          port: 5432
+          role:
+            name: cfdbadmin
+            password: REDACTED
+          sslmode: verify-ca
+        publicly_viewable: true
+        tls:
+          bind_port: 443
+          cert:
+            certificate: REDACTED
+            private_key: REDACTED
+        token_signing_key:
+          private_key: REDACTED
+          public_key: REDACTED
+        vault:
+          auth:
+            backend_max_ttl: null
+            client_token: REDACTED
+          path_prefix: /concourse
+          tls:
+            insecure_skip_verify: true
+          url: https://10.4.1.7
+        worker_gateway:
+          authorized_keys:
+          - REDACTED
+          host_key:
+            private_key: REDACTED
+            public_key: REDACTED
+      release: concourse
+    worker:
+      properties:
+        baggageclaim:
+          driver: detect
+        http_proxy_url: ""
+        https_proxy_url: ""
+        no_proxy:
+        - localhost
+        - 127.0.0.1
+        runtime: containerd
+        worker_gateway:
+          worker_key:
+            private_key: REDACTED
+            public_key: REDACTED
+      release: concourse
+  vault: /secret/uswest2demo/full/concourse
+name: uswest2demo-full-dr-concourse
+networks:
+- name: default
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0ea631cc3ad19e04f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.16.1
+    range: 10.4.16.0/24
+    reserved:
+    - 10.4.16.0-10.4.16.5
+    - 10.4.16.245-10.4.16.254
+    static:
+    - 10.4.16.6-10.4.16.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-09a05edb82702379b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.17.1
+    range: 10.4.17.0/24
+    reserved:
+    - 10.4.17.0-10.4.17.5
+    static:
+    - 10.4.17.6-10.4.17.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0dd034854c197dc41
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.18.1
+    range: 10.4.18.0/24
+    reserved:
+    - 10.4.18.0-10.4.18.5
+    static:
+    - 10.4.18.6-10.4.18.16
+  type: manual
+- name: compilation
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0ea631cc3ad19e04f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.16.1
+    range: 10.4.16.0/24
+    reserved:
+    - 10.4.16.0-10.4.16.244
+  type: manual
+- name: cf-db
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-03720ac266d128f29
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.29.1
+    range: 10.4.29.0/28
+    reserved:
+    - 10.4.29.0-10.4.29.3
+    static:
+    - 10.4.29.4-10.4.29.14
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-015b5284fb46c07e6
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.29.17
+    range: 10.4.29.16/28
+    reserved:
+    - 10.4.29.16-10.4.29.19
+    static:
+    - 10.4.29.20-10.4.29.30
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-05dcf16f08f546160
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.29.33
+    range: 10.4.29.32/28
+    reserved:
+    - 10.4.29.32-10.4.29.35
+    static:
+    - 10.4.29.36-10.4.29.46
+  type: manual
+- name: cf-edge
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0bdaf27eb328f7e4d
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.62.1
+    range: 10.4.62.0/25
+    reserved:
+    - 10.4.62.0-10.4.62.3
+    static:
+    - 10.4.62.4-10.4.62.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-048560ab22b7c345f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.62.129
+    range: 10.4.62.128/25
+    reserved:
+    - 10.4.62.128-10.4.62.131
+    static:
+    - 10.4.62.132-10.4.17.144
+  type: manual
+- name: cf-core
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0a00811172726ce3b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.20.1
+    range: 10.4.20.0/24
+    reserved:
+    - 10.4.20.0-10.4.20.5
+    static:
+    - 10.4.20.6-10.4.20.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-03e4614c67b6af3d5
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.21.1
+    range: 10.4.21.0/24
+    reserved:
+    - 10.4.21.0-10.4.21.5
+    static:
+    - 10.4.21.6-10.4.21.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-04ecdc31ba8c3d685
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.22.1
+    range: 10.4.22.0/24
+    reserved:
+    - 10.4.22.0-10.4.22.5
+    static:
+    - 10.4.22.6-10.4.22.16
+  type: manual
+- name: cf-runtime
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-08f6940f71c779a15
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.23.1
+    range: 10.4.23.0/24
+    reserved:
+    - 10.4.23.0-10.4.23.5
+    static:
+    - 10.4.23.6-10.4.23.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-0964231d662ce7e9b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.24.1
+    range: 10.4.24.0/24
+    reserved:
+    - 10.4.24.0-10.4.24.5
+    static:
+    - 10.4.24.6-10.4.24.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0e513e543403b53ac
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.25.1
+    range: 10.4.25.0/24
+    reserved:
+    - 10.4.25.0-10.4.25.5
+    static:
+    - 10.4.25.6-10.4.25.16
+  type: manual
+- name: blacksmith
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-062565d28649eeb00
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.26.1
+    range: 10.4.26.0/24
+    reserved:
+    - 10.4.26.0-10.4.26.5
+    - 10.4.26.245-10.4.26.254
+    static:
+    - 10.4.26.6-10.4.26.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-0d10710c119782f5f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.27.1
+    range: 10.4.27.0/24
+    reserved:
+    - 10.4.27.0-10.4.27.5
+    static:
+    - 10.4.27.6-10.4.27.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-06fb1168c8fba4e45
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.28.1
+    range: 10.4.28.0/24
+    reserved:
+    - 10.4.28.0-10.4.28.5
+    static:
+    - 10.4.28.6-10.4.28.16
+  type: manual
+- name: concourse-full-dr
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0f56fcba8b1ba95b3
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.1.1
+    range: 10.4.1.0/24
+    reserved:
+    - 10.4.1.0-10.4.1.99
+    static:
+    - 10.4.1.170-10.4.1.176
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-04066d0a30fd1c020
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.2.1
+    range: 10.4.2.0/24
+    reserved:
+    - 10.4.2.0-10.4.2.99
+    static:
+    - 10.4.2.170-10.4.2.176
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0f2b10a0d103f3c83
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.3.1
+    range: 10.4.3.0/24
+    reserved:
+    - 10.4.3.0-10.4.3.99
+    static:
+    - 10.4.3.170-10.4.3.176
+  type: manual
+- name: dev
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0ea631cc3ad19e04f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.16.1
+    range: 10.4.16.0/24
+    reserved:
+    - 10.4.16.0-10.4.16.3
+    static:
+    - 10.4.16.4-10.4.16.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-09a05edb82702379b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.17.1
+    range: 10.4.17.0/24
+    reserved:
+    - 10.4.17.0-10.4.17.3
+    static:
+    - 10.4.17.4-10.4.17.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0dd034854c197dc41
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.18.1
+    range: 10.4.18.0/24
+    reserved:
+    - 10.4.18.0-10.4.18.3
+    static:
+    - 10.4.18.4-10.4.18.16
+  type: manual
+params:
+  authz_allowed_orgs: starkandwayne
+  availability_zone:
+  - z1
+  - z2
+  - z3
+  concourse_disk_type: concourse
+  concourse_network: concourse-full-dr
+  concourse_vm_type: concourse
+  env: uswest2demo
+  external_db_ca: "-----BEGIN CERTIFICATE-----                                                     \nMIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+    \               \nVQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+    \               \nMCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+    \               \nem9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+    \               \nODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+    \               \nBAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+    \               \nbiBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+    \               \nBAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+    \               \nAQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+    \               \noWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+    \               \n0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+    \               \n6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+    \               \nO08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+    \               \nMcZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+    \               \nBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+    \               \npmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+    \               \nAQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+    \               \nynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+    \               \nNUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+    \               \ncbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+    \               \n0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+    \               \nzPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=                                            \n-----END
+    CERTIFICATE-----\n"
+  external_db_host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
+  external_db_name: atcdr
+  external_db_port: 5432
+  external_db_sslmode: verify-ca
+  external_db_user: cfdbadmin
+  external_domain: concoursedr.codex.starkandwayne.com
+  external_url: https://concoursedr.codex.starkandwayne.com
+  num_web_nodes: 1
+  stemcell_os: ubuntu-bionic
+  stemcell_version: latest
+  tags:
+  - uswest2demo
+  - dev
+  token_signing_key:
+    private_key: REDACTED
+    public_key: REDACTED
+  tsa_host_env: uswest2demo-full
+  vault_approle_role_id: REDACTED
+  vault_approle_secret_id: REDACTED
+  vault_insecure_skip_verify: true
+  vault_prefix: uswest2demo/full/concourse
+  vault_token: REDACTED
+  vault_url: https://10.4.1.7
+  volume_driver: detect
+  worker_count: 3
+  worker_vm_type: concourse-worker
+  workers: 3
+releases:
+- name: concourse
+  sha1: 1e242ed38f73de72ba1bb48f85ea7fbf7eb634a1
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.7.1
+  version: 7.7.1
+- name: slack-notification-resource
+  sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
+  url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+  version: 9
+- name: locker
+  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
+  version: 0.2.1
+- name: haproxy
+  sha1: 3977888a5b0fdcccf8f30a64165dcc7b1cec67ca
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=11.10.1
+  version: 11.10.1
+- name: bpm
+  sha1: 0d48aa01a65b947b97570234eb2401e821a8bd35
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.15
+  version: 1.1.15
+stemcells:
+- alias: default
+  os: ubuntu-bionic
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000
+vm_extensions:
+- cloud_properties:
+    ephemeral_disk:
+      size: 102400
+      type: gp3
+  name: 100GB_ephemeral_disk
+- cloud_properties:
+    ephemeral_disk:
+      size: 51200
+      type: gp3
+  name: 50GB_ephemeral_disk
+- cloud_properties:
+    elbs:
+    - snw-dev-cf-elb
+  name: cf-router-network-properties
+- cloud_properties:
+    elbs:
+    - dev-cf-tcp-lb
+  name: cf-tcp-router-network-properties
+- name: diego-ssh-proxy-network-properties
+vm_types:
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-broker
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-collector
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-engine
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-operator
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-scaler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: as-scheduler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: bbs
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: blobstore
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 24576
+      type: gp3
+    instance_type: t3.medium
+  name: bosh
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: cc-worker
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 65536
+      type: gp3
+    instance_type: t3.medium
+  name: compilation
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 65536
+      type: gp3
+    instance_type: t3.medium
+  name: concourse-worker
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: credhub
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: default
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 262144
+      type: gp3
+    instance_type: t3.medium
+  name: diego-cell
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: diego-api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: doppler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: errand
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: haproxy
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: large
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: log-api
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.small
+  name: medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: minimal
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: nats
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 32768
+      type: gp3
+    instance_type: t3.medium
+  name: postgres
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: router
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: scheduler
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: small
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: small-cf
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 24576
+      type: gp3
+    instance_type: t3.medium
+  name: small-highmem
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.medium
+  name: syslogger
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 8192
+      type: gp3
+    instance_type: t3.small
+  name: tcp-router
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 81920
+      type: gp3
+    instance_type: t3.medium
+  name: thunder-dome
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 16384
+      type: gp3
+    instance_type: t3.medium
+  name: uaa
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: blacksmith-redis-small
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith-redis-medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.large
+  name: blacksmith-redis-large
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: blacksmith-rabbitmq-medium
+- cloud_properties:
+    ephemeral_disk:
+      encrypted: true
+      size: 10240
+      type: gp3
+    instance_type: t3.medium
+  name: blacksmith-rabbitmq-large
+- cloud_properties:
+    ephemeral_disk:
+      size: 10240
+      type: gp3
+    instance_type: t3.small
+  name: concourse

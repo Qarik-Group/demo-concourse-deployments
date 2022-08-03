@@ -1,0 +1,21 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - (( replace ))
+    - workers
+      #This was a yaml for
+genesis:
+  bosh_env: uswest2demo
+  env:            uswest2demo-solo
+  min_version:    2.7.6
+
+
+params:
+  tsa_host_env: uswest2demo-full
+  tags: ["solo"]
+  env: uswest2demo
+  external_domain: concourse.codex.starkandwayne.com
+  vault_prefix: uswest2demo/full/concourse
+  worker_count: 1

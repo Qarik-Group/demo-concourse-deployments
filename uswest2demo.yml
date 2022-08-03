@@ -1,0 +1,19 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - (( replace ))
+    - workers
+
+genesis:
+  env:            uswest2demo
+  min_version:    2.7.6
+
+
+params:
+  tags: ["uswest2demo","dev"]
+  env: uswest2demo
+  tsa_host_env: uswest2demo-full
+  external_domain: concourse.codex.starkandwayne.com
+  vault_prefix: uswest2demo/full/concourse
