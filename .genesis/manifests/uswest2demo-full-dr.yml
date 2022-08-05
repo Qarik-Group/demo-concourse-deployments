@@ -93,7 +93,7 @@ disk_types:
 exodus:
   atc_ca_cert: REDACTED
   bosh: uswest2demo
-  dated: 2022-08-02 18:10:56 +0000
+  dated: 2022-08-04 20:15:38 +0000
   deployer: ubuntu
   external_url: https://concoursedr.codex.starkandwayne.com
   features: full,github-oauth,self-signed-cert,external-db,vault
@@ -214,7 +214,7 @@ instance_groups:
         role:
           name: cfdbadmin
           password: REDACTED
-        sslmode: verify-ca
+        sslmode: disable
       publicly_viewable: true
       tls:
         bind_port: 443
@@ -228,7 +228,7 @@ instance_groups:
         auth:
           backend_max_ttl: null
           client_token: REDACTED
-        path_prefix: /concourse
+        path_prefix: secret/uswest2demo/full/dr/
         tls:
           insecure_skip_verify: true
         url: https://10.4.1.7
@@ -326,7 +326,7 @@ meta:
           role:
             name: cfdbadmin
             password: REDACTED
-          sslmode: verify-ca
+          sslmode: disable
         publicly_viewable: true
         tls:
           bind_port: 443
@@ -340,7 +340,7 @@ meta:
           auth:
             backend_max_ttl: null
             client_token: REDACTED
-          path_prefix: /concourse
+          path_prefix: secret/uswest2demo/full/dr/
           tls:
             insecure_skip_verify: true
           url: https://10.4.1.7
@@ -369,49 +369,6 @@ meta:
   vault: /secret/uswest2demo/full/concourse
 name: uswest2demo-full-dr-concourse
 networks:
-- name: default
-  subnets:
-  - azs:
-    - z1
-    cloud_properties:
-      subnet: subnet-0ea631cc3ad19e04f
-    dns:
-    - 1.1.1.1
-    - 8.8.4.4
-    gateway: 10.4.16.1
-    range: 10.4.16.0/24
-    reserved:
-    - 10.4.16.0-10.4.16.5
-    - 10.4.16.245-10.4.16.254
-    static:
-    - 10.4.16.6-10.4.16.16
-  - azs:
-    - z2
-    cloud_properties:
-      subnet: subnet-09a05edb82702379b
-    dns:
-    - 1.1.1.1
-    - 8.8.4.4
-    gateway: 10.4.17.1
-    range: 10.4.17.0/24
-    reserved:
-    - 10.4.17.0-10.4.17.5
-    static:
-    - 10.4.17.6-10.4.17.16
-  - azs:
-    - z3
-    cloud_properties:
-      subnet: subnet-0dd034854c197dc41
-    dns:
-    - 1.1.1.1
-    - 8.8.4.4
-    gateway: 10.4.18.1
-    range: 10.4.18.0/24
-    reserved:
-    - 10.4.18.0-10.4.18.5
-    static:
-    - 10.4.18.6-10.4.18.16
-  type: manual
 - name: compilation
   subnets:
   - azs:
@@ -708,6 +665,64 @@ networks:
     static:
     - 10.4.18.4-10.4.18.16
   type: manual
+- name: default
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0ea631cc3ad19e04f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.16.1
+    range: 10.4.16.0/24
+    reserved:
+    - 10.4.16.0-10.4.16.3
+    static:
+    - 10.4.16.4-10.4.16.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-09a05edb82702379b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.17.1
+    range: 10.4.17.0/24
+    reserved:
+    - 10.4.17.0-10.4.17.3
+    static:
+    - 10.4.17.4-10.4.17.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0dd034854c197dc41
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.18.1
+    range: 10.4.18.0/24
+    reserved:
+    - 10.4.18.0-10.4.18.3
+    static:
+    - 10.4.18.4-10.4.18.16
+  type: manual
+- name: baby
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-064b78e587e3b8bf5
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.63.1
+    range: 10.4.63.0/24
+    reserved:
+    - 10.4.63.0-10.4.63.3
+    static:
+    - 10.4.63.4-10.4.63.6
+  type: manual
 params:
   authz_allowed_orgs: starkandwayne
   availability_zone:
@@ -718,33 +733,35 @@ params:
   concourse_network: concourse-full-dr
   concourse_vm_type: concourse
   env: uswest2demo
-  external_db_ca: "-----BEGIN CERTIFICATE-----                                                     \nMIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
-    \               \nVQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
-    \               \nMCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
-    \               \nem9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
-    \               \nODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
-    \               \nBAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
-    \               \nbiBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
-    \               \nBAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
-    \               \nAQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
-    \               \noWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
-    \               \n0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
-    \               \n6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
-    \               \nO08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
-    \               \nMcZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
-    \               \nBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
-    \               \npmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
-    \               \nAQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
-    \               \nynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
-    \               \nNUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
-    \               \ncbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
-    \               \n0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
-    \               \nzPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=                                            \n-----END
-    CERTIFICATE-----\n"
+  external_db_ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
+    VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
+    MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
+    em9uIFJEUzEgMB4GA1UEAwwXQW1hem9uIFJEUyBSb290IDIwMTkgQ0EwHhcNMTkw
+    ODIyMTcwODUwWhcNMjQwODIyMTcwODUwWjCBjzELMAkGA1UEBhMCVVMxEDAOBgNV
+    BAcMB1NlYXR0bGUxEzARBgNVBAgMCldhc2hpbmd0b24xIjAgBgNVBAoMGUFtYXpv
+    biBXZWIgU2VydmljZXMsIEluYy4xEzARBgNVBAsMCkFtYXpvbiBSRFMxIDAeBgNV
+    BAMMF0FtYXpvbiBSRFMgUm9vdCAyMDE5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOC
+    AQ8AMIIBCgKCAQEArXnF/E6/Qh+ku3hQTSKPMhQQlCpoWvnIthzX6MK3p5a0eXKZ
+    oWIjYcNNG6UwJjp4fUXl6glp53Jobn+tWNX88dNH2n8DVbppSwScVE2LpuL+94vY
+    0EYE/XxN7svKea8YvlrqkUBKyxLxTjh+U/KrGOaHxz9v0l6ZNlDbuaZw3qIWdD/I
+    6aNbGeRUVtpM6P+bWIoxVl/caQylQS6CEYUk+CpVyJSkopwJlzXT07tMoDL5WgX9
+    O08KVgDNz9qP/IGtAcRduRcNioH3E9v981QO1zt/Gpb2f8NqAjUUCUZzOnij6mx9
+    McZ+9cWX88CRzR0vQODWuZscgI08NvM69Fn2SQIDAQABo2MwYTAOBgNVHQ8BAf8E
+    BAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUc19g2LzLA5j0Kxc0LjZa
+    pmD/vB8wHwYDVR0jBBgwFoAUc19g2LzLA5j0Kxc0LjZapmD/vB8wDQYJKoZIhvcN
+    AQELBQADggEBAHAG7WTmyjzPRIM85rVj+fWHsLIvqpw6DObIjMWokpliCeMINZFV
+    ynfgBKsf1ExwbvJNzYFXW6dihnguDG9VMPpi2up/ctQTN8tm9nDKOy08uNZoofMc
+    NUZxKCEkVKZv+IL4oHoeayt8egtv3ujJM6V14AstMQ6SwvwvA93EP/Ug2e4WAXHu
+    cbI1NAbUgVDqp+DRdfvZkgYKryjTWd/0+1fS8X1bBZVWzl7eirNVnHbSH2ZDpNuY
+    0SBd8dj5F6ld3t58ydZbrTHze7JJOd8ijySAp4/kiu9UfZWuTPABzDa/DSdz9Dk/
+    zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
+    -----END CERTIFICATE-----
   external_db_host: snw-dev-cf-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com
   external_db_name: atcdr
   external_db_port: 5432
-  external_db_sslmode: verify-ca
+  external_db_sslmode: disable
   external_db_user: cfdbadmin
   external_domain: concoursedr.codex.starkandwayne.com
   external_url: https://concoursedr.codex.starkandwayne.com
@@ -761,6 +778,7 @@ params:
   vault_approle_role_id: REDACTED
   vault_approle_secret_id: REDACTED
   vault_insecure_skip_verify: true
+  vault_path_prefix: secret/uswest2demo/full/dr/
   vault_prefix: uswest2demo/full/concourse
   vault_token: REDACTED
   vault_url: https://10.4.1.7
@@ -825,70 +843,70 @@ vm_types:
       encrypted: true
       size: 32768
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: api
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-api
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-broker
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-collector
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-engine
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-operator
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-scaler
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: as-scheduler
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: bbs
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: blobstore
 - cloud_properties:
     ephemeral_disk:
@@ -902,49 +920,49 @@ vm_types:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.nano
   name: cc-worker
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 65536
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: compilation
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 65536
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: concourse-worker
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: credhub
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.nano
   name: default
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 262144
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.nano
   name: diego-cell
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 32768
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: diego-api
 - cloud_properties:
     ephemeral_disk:
@@ -958,21 +976,21 @@ vm_types:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: errand
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: haproxy
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 32768
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: large
 - cloud_properties:
     ephemeral_disk:
@@ -986,42 +1004,42 @@ vm_types:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: medium
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 10240
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.nano
   name: minimal
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: nats
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 32768
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: postgres
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: router
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: scheduler
 - cloud_properties:
     ephemeral_disk:
@@ -1042,35 +1060,35 @@ vm_types:
       encrypted: true
       size: 24576
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: small-highmem
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: syslogger
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 8192
       type: gp3
-    instance_type: t3.small
+    instance_type: t3.nano
   name: tcp-router
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 81920
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.nano
   name: thunder-dome
 - cloud_properties:
     ephemeral_disk:
       encrypted: true
       size: 16384
       type: gp3
-    instance_type: t3.medium
+    instance_type: t3.small
   name: uaa
 - cloud_properties:
     ephemeral_disk:
