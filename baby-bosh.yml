@@ -1,0 +1,19 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - (( replace ))
+    - small-footprint
+    - self-signed-cert
+  # - external-db
+genesis:
+  env:            baby-bosh
+  min_version:    2.7.6
+
+
+params:
+  external_domain: 10.4.68.6
+  availability_zones: [z1]
+  concourse_network: concourse-ips
+  external_db_host: baby-bosh-concourse-db.cmziohdu4x1g.us-west-2.rds.amazonaws.com

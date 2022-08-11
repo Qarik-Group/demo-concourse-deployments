@@ -5,20 +5,16 @@ kit:
   features:                                                                         
     - (( replace ))                                                                 
     - full                                                                          
-    - github-oauth                                                                  
     - self-signed-cert                                                              
     - external-db                                                                   
-    - vault                                                                         
-                                                                                    
+    - vault 
+      
 genesis:                                                                            
   bosh-env: uswest2demo                                                             
   env:            uswest2demo-full-dr                                               
-  min_version:    2.7.6                                                             
                                                                                     
                                                                                     
-params:                                                                             
-  vault_path_prefix: "secret/uswest2demo/full/dr/"
-  authz_allowed_orgs: starkandwayne                                                 
+params:
   external_domain: concoursedr.codex.starkandwayne.com                              
   vault_insecure_skip_verify: true                                                  
   vault_url: https://10.4.1.7                                                       
@@ -33,4 +29,15 @@ params:
   external_db_port: 5432                                                            
   external_db_name: atcdr                                                           
   external_db_user: cfdbadmin                                                       
-  external_db_sslmode: disable                                                    
+  external_db_sslmode: disable
+
+instance_groups:
+  - name: web
+    jobs:
+    - name: web
+      properties:
+        saml_auth:
+          display_name: "Okta"
+          ca_cert: 
+            certificate: (( vault "secret/uswest2demo/full/dr/concourse/okta:ca_cert" )) 
+          sso_url: "https://qarik.okta.com/app/qarik_concourse_1/exk8llosw9ReJyXMz4x7/sso/saml"
